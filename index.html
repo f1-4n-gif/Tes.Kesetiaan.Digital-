@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tes Kesetiaan Digital | Alfian, Guru Bimbingan Konseling - Manokwari</title>
+    
+
+<script src="https://cdn.tailwindcss.com"></script>
+    
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <style>
+        /* Mengatur tema warna pink/putih dan font lembut */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fce7f3; /* Pink lembut sebagai latar belakang */
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .app-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .main-content {
+            background-color: white;
+            padding: 3rem;
+            min-height: 500px;
+        }
+        .btn-pink {
+            background-color: #FF69B4; /* Hot Pink */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .btn-pink:hover {
+            background-color: #ff85c2;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: #FF69B4;
+            border: 2px solid #FFC0CB;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-outline:hover {
+            background-color: #ffc0cb30;
+        }
+        .input-style {
+            padding: 0.75rem;
+            border: 2px solid #FFC0CB;
+            border-radius: 10px;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-style:focus {
+            border-color: #FF69B4;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.2);
+        }
+        /* Style untuk skala jawaban 1-5 */
+        .rating-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 700;
+            border: 2px solid #FFC0CB;
+        }
+        input[type="radio"]:checked + .rating-label {
+            background-color: #FF69B4;
+            color: white;
+            border-color: #FF69B4;
+            transform: scale(1.1);
+        }
+        .rating-container input[type="radio"] {
+            display: none;
+        }
+        .rating-container {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        /* Chart.js specific styling for a soft look */
+        #resultsChart {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 10px;
+        }
+
+        /* Modal styling */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Kategori warna */
+        .kategori-sangat-setia { color: #FF69B4; }
+        .kategori-cukup-setia { color: #FFA07A; }
+        .kategori-perlu-dipertimbangkan { color: #F0E68C; }
+        .kategori-kurang-setia { color: #D70040; }
+        
+        @media print {
+            body { background: white; }
+            .app-container, #about-modal { box-shadow: none; margin: 0; max-width: none; }
+            .print-hidden { display: none !important; }
+            .main-content { padding: 1rem; min-height: auto; }
+            h1, h2 { color: #000 !important; }
+            .kategori-sangat-setia, .kategori-cukup-setia, .kategori-perlu-dipertimbangkan, .kategori-kurang-setia { color: #333 !important; } /* Simplify colors for print */
+        }
+    </style>
+    <script>
+        // Deklarasi variabel global untuk Firebase dan API KEY (dibiarkan kosong sesuai instruksi)
+        const apiKey = ""; 
+        
+        // --- DATA PERTANYAN TES ---
+        const questionsData = [
+            // ASPEK EMOSIONAL (Komitmen Perasaan) - 9 Pertanyaan
+            { aspect: 'Emosional', question: 'Saya tetap setia secara perasaan meskipun ada godaan dari luar.' },
+            { aspect: 'Emosional', question: 'Saya merasa nyaman dan puas dengan hubungan yang saya miliki saat ini.' },
+            { aspect: 'Emosional', question: 'Saya berusaha untuk menumbuhkan rasa cinta dan kasih sayang yang lebih dalam.' },
+            { aspect: 'Emosional', question: 'Saya memprioritaskan kebutuhan emosional orang yang saya sayangi.' },
+            { aspect: 'Emosional', question: 'Saya selalu hadir secara emosional ketika dibutuhkan.' },
+            { aspect: 'Emosional', question: 'Saya tidak mudah terpikat pada pesona orang lain ketika sedang dalam komitmen.' },
+            { aspect: 'Emosional', question: 'Saya merasa bertanggung jawab atas kebahagiaan emosional dalam hubungan.' },
+            { aspect: 'Emosional', question: 'Saya mempertahankan perasaan positif terhadap hubungan ini, bahkan di masa sulit.' },
+            { aspect: 'Emosional', question: 'Saya tidak merasa bosan atau jenuh dengan mudah.' },
+
+            // ASPEK KOGNITIF (Kepercayaan & Integritas) - 8 Pertanyaan
+            { aspect: 'Kognitif', question: 'Saya berkomitmen menjaga kepercayaan orang lain dan tidak akan mengkhianatinya.' },
+            { aspect: 'Kognitif', question: 'Saya selalu jujur mengenai hal-hal penting tanpa menyembunyikan fakta.' },
+            { aspect: 'Kognitif', question: 'Saya mempertahankan integritas moral dalam setiap tindakan dan keputusan saya.' },
+            { aspect: 'Kognitif', question: 'Saya tidak mudah membeberkan rahasia atau aib orang lain kepada pihak ketiga.' },
+            { aspect: 'Kognitif', question: 'Saya selalu berpikir positif dan menghindari prasangka buruk terhadap komitmen saya.' },
+            { aspect: 'Kognitif', question: 'Saya menghormati pandangan dan keputusan orang lain dalam hubungan ini.' },
+            { aspect: 'Kognitif', question: 'Saya memiliki prinsip yang kuat bahwa kesetiaan adalah nilai utama yang harus dipegang.' },
+            { aspect: 'Kognitif', question: 'Saya mempertimbangkan dampak jangka panjang dari tindakan saya terhadap kepercayaan.' },
+            
+            // ASPEK PERILAKU (Tindakan Nyata) - 8 Pertanyaan
+            { aspect: 'Perilaku', question: 'Saya secara konsisten memenuhi janji dan komitmen yang telah saya buat.' },
+            { aspect: 'Perilaku', question: 'Saya mengalokasikan waktu dan perhatian yang cukup untuk hubungan ini.' },
+            { aspect: 'Perilaku', question: 'Saya berusaha keras untuk menyelesaikan masalah, bukan melarikan diri darinya.' },
+            { aspect: 'Perilaku', question: 'Saya tidak pernah mencari atau membuka peluang untuk selingkuh, baik daring maupun luring.' },
+            { aspect: 'Perilaku', question: 'Saya menunjukkan kesetiaan melalui tindakan nyata, bukan hanya kata-kata.' },
+            { aspect: 'Perilaku', question: 'Saya melakukan apa pun yang diperlukan untuk mendukung orang yang saya sayangi.' },
+            { aspect: 'Perilaku', question: 'Saya selalu membela dan mendukung orang yang saya sayangi di depan orang lain.' },
+            { aspect: 'Perilaku', question: 'Saya secara proaktif mengambil langkah untuk memperkuat hubungan ini.' },
+        ];
+
+        // --- SKALA JAWABAN (1-5) ---
+        const scaleLabels = {
+            1: 'Sangat Tidak Setuju',
+            2: 'Tidak Setuju',
+            3: 'Netral',
+            4: 'Setuju',
+            5: 'Sangat Setuju'
+        };
+
+        // --- VARIABEL STATE APLIKASI ---
+        let userProfile = {};
+        let rawScores = {}; // Untuk menyimpan skor mentah per pertanyaan
+        let aspectScores = { Emosional: 0, Kognitif: 0, Perilaku: 0 }; // Untuk menyimpan skor akhir per aspek (skala 0-100)
+        let finalScore = 0;
+        let chartInstance = null;
+        
+        // --- KONFIGURASI DAN MAKSIMAL SKOR ---
+        const maxRawScores = {
+            Emosional: 9 * 5,
+            Kognitif: 8 * 5,
+            Perilaku: 8 * 5,
+        };
+
+        // --- FUNGSI UTAMA ---
+
+        /**
+         * Mengubah tampilan layar utama aplikasi.
+         * @param {string} screenId ID dari layar yang ingin ditampilkan
+         */
+        function showScreen(screenId) {
+            const screens = ['home-screen', 'input-screen', 'test-screen', 'results-screen'];
+            screens.forEach(id => {
+                const screen = document.getElementById(id);
+                if (screen) {
+                    screen.classList.add('hidden');
+                }
+            });
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.remove('hidden');
+                window.scrollTo(0, 0); // Gulir ke atas setiap pindah layar
+            }
+            if (screenId === 'home-screen') {
+                // Pastikan tombol 'Tentang Tes' berfungsi
+                document.getElementById('about-test-btn').onclick = () => showAboutModal(true);
+            }
+        }
+
+        /**
+         * Menampilkan atau menyembunyikan modal 'Tentang Tes' dan 'Tentang Pengembang'.
+         * @param {boolean} show Apakah modal akan ditampilkan
+         */
+        function showAboutModal(show) {
+            const modal = document.getElementById('about-modal');
+            if (modal) {
+                modal.classList.toggle('hidden', !show);
+            }
+        }
+
+        /**
+         * Memulai tes dengan mengumpulkan data input pengguna.
+         */
+        function startTest() {
+            const nameInput = document.getElementById('user-name');
+            const genderInput = document.getElementById('user-gender');
+            const relationshipInput = document.getElementById('user-relationship');
+
+            if (!nameInput.value || !relationshipInput.value) {
+                // Menggunakan pesan di UI, bukan alert()
+                document.getElementById('input-error-message').textContent = 'Mohon lengkapi Nama dan Hubungan yang dinilai untuk melanjutkan.';
+                return;
+            }
+            document.getElementById('input-error-message').textContent = '';
+
+            userProfile = {
+                name: nameInput.value,
+                gender: genderInput.value || 'Tidak Disebutkan',
+                relationship: relationshipInput.value
+            };
+
+            rawScores = {}; // Reset skor
+            renderQuestions();
+            showScreen('test-screen');
+        }
+
+        /**
+         * Menggambar semua pertanyaan tes ke layar.
+         */
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+            let currentAspect = '';
+
+            questionsData.forEach((item, index) => {
+                if (item.aspect !== currentAspect) {
+                    currentAspect = item.aspect;
+                    // Tambahkan judul aspek
+                    const aspectTitle = document.createElement('h3');
+                    aspectTitle.className = 'text-xl font-bold mt-8 mb-4 text-[#FF69B4] border-b-2 border-pink-100 pb-2';
+                    aspectTitle.textContent = `Aspek ${item.aspect}`;
+                    container.appendChild(aspectTitle);
+                }
+
+                // Buat div untuk setiap pertanyaan
+                const qDiv = document.createElement('div');
+                qDiv.className = 'p-5 bg-pink-50 rounded-xl shadow-md mb-4 flex flex-col md:flex-row justify-between items-start md:items-center';
+                
+                const qText = document.createElement('p');
+                qText.className = 'font-semibold text-gray-700 mb-4 md:mb-0 md:w-3/5';
+                qText.textContent = `${index + 1}. ${item.question}`;
+                qDiv.appendChild(qText);
+
+                // Buat container untuk skala jawaban (1-5)
+                const ratingContainer = document.createElement('div');
+                ratingContainer.className = 'rating-container md:w-2/5 justify-start md:justify-end';
+
+                for (let i = 1; i <= 5; i++) {
+                    const id = `q${index}-${i}`;
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.id = id;
+                    input.name = `q${index}`;
+                    input.value = i;
+                    input.setAttribute('data-index', index);
+                    input.setAttribute('data-aspect', item.aspect);
+                    input.onchange = handleAnswerChange;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = id;
+                    label.className = 'rating-label';
+                    label.textContent = i;
+                    label.title = scaleLabels[i];
+
+                    ratingContainer.appendChild(input);
+                    ratingContainer.appendChild(label);
+
+                    // Pre-select previous answer if exists (for reset/back)
+                    if (rawScores[`q${index}`] === i) {
+                        input.checked = true;
+                    }
+                }
+
+                qDiv.appendChild(ratingContainer);
+                container.appendChild(qDiv);
+            });
+        }
+
+        /**
+         * Menangani perubahan jawaban dan menyimpan skor mentah.
+         * @param {Event} event Event perubahan input radio
+         */
+        function handleAnswerChange(event) {
+            const input = event.target;
+            const qName = input.name;
+            const score = parseInt(input.value);
+            rawScores[qName] = score;
+        }
+
+        /**
+         * Memeriksa apakah semua pertanyaan sudah dijawab.
+         * @returns {boolean} True jika semua sudah dijawab
+         */
+        function validateAllAnswered() {
+            for (let i = 0; i < questionsData.length; i++) {
+                if (!rawScores[`q${i}`]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Menghitung dan menampilkan hasil tes.
+         */
+        function calculateAndShowResults() {
+            const errorMessageElement = document.getElementById('test-error-message');
+            if (!validateAllAnswered()) {
+                errorMessageElement.textContent = 'Mohon jawab semua 25 pertanyaan untuk melihat hasil tes.';
+                return;
+            }
+            errorMessageElement.textContent = ''; // Clear error message
+
+            // 1. Reset skor aspek
+            let rawAspectScores = { Emosional: 0, Kognitif: 0, Perilaku: 0 };
+            
+            // 2. Hitung total skor mentah per aspek
+            questionsData.forEach((item, index) => {
+                const qName = `q${index}`;
+                const score = rawScores[qName] || 0; // Default ke 0 jika somehow missing
+                rawAspectScores[item.aspect] += score;
+            });
+
+            // 3. Skala skor aspek ke 0-100
+            let totalScore100 = 0;
+            const aspects = ['Emosional', 'Kognitif', 'Perilaku'];
+            aspects.forEach(aspect => {
+                const rawScore = rawAspectScores[aspect];
+                const maxRaw = maxRawScores[aspect];
+                
+                // Rumus Skala: (Skor Mentah / Skor Maksimum Mentah) * 100
+                const scaledScore = Math.round((rawScore / maxRaw) * 100);
+                aspectScores[aspect] = scaledScore;
+                totalScore100 += scaledScore;
+            });
+
+            // 4. Hitung Nilai Akhir: (Emosional + Kognitif + Perilaku) / 3
+            finalScore = Math.round(totalScore100 / 3);
+
+            // 5. Tentukan Kategori dan Analisis
+            const resultCategory = determineCategory(finalScore);
+            const descriptiveAnalysis = generateAnalysis(aspects);
+
+            // 6. Tampilkan hasil di layar
+            document.getElementById('result-name').textContent = userProfile.name;
+            document.getElementById('result-relationship').textContent = userProfile.relationship;
+            document.getElementById('result-score').textContent = finalScore;
+            document.getElementById('result-category').textContent = resultCategory.label;
+            document.getElementById('result-category').className = `text-4xl font-extrabold mb-4 ${resultCategory.class}`;
+            document.getElementById('result-analysis').innerHTML = descriptiveAnalysis;
+
+            // Update print section
+            document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID');
+            document.getElementById('print-name').textContent = userProfile.name;
+            document.getElementById('print-relation').textContent = userProfile.relationship;
+
+            // 7. Render Chart
+            renderResultsChart();
+
+            // 8. Pindah layar
+            showScreen('results-screen');
+        }
+
+        /**
+         * Menentukan kategori hasil berdasarkan skor total.
+         * @param {number} score Skor akhir (0-100)
+         * @returns {{label: string, class: string}} Kategori dan kelas CSS
+         */
+        function determineCategory(score) {
+            if (score >= 81) return { label: 'Sangat Setia 💖', class: 'kategori-sangat-setia' };
+            if (score >= 61) return { label: 'Cukup Setia 💗', class: 'kategori-cukup-setia' };
+            if (score >= 41) return { label: 'Perlu Dipertimbangkan 💬', class: 'kategori-perlu-dipertimbangkan' };
+            return { label: 'Kurang Setia 💔', class: 'kategori-kurang-setia' };
+        }
+
+        /**
+         * Menghasilkan analisis deskriptif berdasarkan skor aspek.
+         * @param {string[]} aspects Array aspek ['Emosional', 'Kognitif', 'Perilaku']
+         * @returns {string} Analisis deskriptif dalam format HTML
+         */
+        function generateAnalysis(aspects) {
+            let highAspects = [];
+            let lowAspects = [];
+            let analysis = '<p class="text-lg mb-4">Analisis Anda:</p>';
+            let overallFeedback = '';
+
+            // Tentukan aspek tertinggi dan terendah
+            const scores = aspects.map(a => ({ name: a, score: aspectScores[a] }));
+            scores.sort((a, b) => b.score - a.score);
+
+            const highest = scores[0];
+            const lowest = scores[scores.length - 1];
+
+            // Feedback berdasarkan skor total
+            if (finalScore >= 81) {
+                overallFeedback = `<p class="font-semibold text-green-700">Secara keseluruhan, Anda adalah individu yang menunjukkan komitmen dan kesetiaan luar biasa. Pertahankan integritas dan tindakan konsisten Anda!</p>`;
+            } else if (finalScore >= 61) {
+                overallFeedback = `<p class="font-semibold text-yellow-700">Anda berada di jalur yang baik! Tingkat kesetiaan Anda cukup tinggi, namun ada area yang masih bisa diperkuat.</p>`;
+            } else if (finalScore >= 41) {
+                overallFeedback = `<p class="font-semibold text-orange-700">Hasil ini menyarankan perlunya evaluasi serius. Kesetiaan Anda saat ini berada di batas yang perlu ditingkatkan secara signifikan.</p>`;
+            } else {
+                overallFeedback = `<p class="font-semibold text-red-700">Peringatan: Hasil ini menunjukkan tingkat kesetiaan yang sangat rendah. Refleksi mendalam terhadap nilai-nilai komitmen sangat diperlukan.</p>`;
+            }
+            analysis += overallFeedback;
+
+            // Feedback berdasarkan perbandingan aspek
+            analysis += '<div class="mt-4 p-4 bg-pink-100 rounded-lg">';
+
+            if (highest.score > lowest.score + 20) { // Jika ada perbedaan signifikan
+                analysis += `<p>Anda menunjukkan **kekuatan dominan** di Aspek <span class="font-bold text-[#FF69B4]">${highest.name}</span> dengan skor **${highest.score}/100**. Ini berarti komitmen ${highest.name.toLowerCase()} Anda sudah sangat kokoh.</p>`;
+                analysis += `<p class="mt-2">Namun, Anda perlu memberikan perhatian lebih pada Aspek <span class="font-bold text-red-600">${lowest.name}</span>, yang memiliki skor **${lowest.score}/100**. Tingkatkan konsistensi dalam hal ${lowest.name.toLowerCase()} untuk mencapai kesetiaan yang seimbang.</p>`;
+            } else if (highest.score > lowest.score + 10) {
+                 analysis += `<p>Anda cenderung kuat di Aspek <span class="font-bold text-[#FF69B4]">${highest.name}</span>, tetapi perlu menguatkan Aspek <span class="font-bold text-red-600">${lowest.name}</span> agar kesetiaan Anda lebih merata dan teruji.</p>`;
+            } else {
+                analysis += `<p>Kesetiaan Anda relatif **seimbang** di ketiga aspek. Terus pertahankan konsistensi dalam Emosional, Kognitif, dan Perilaku.</p>`;
+            }
+            analysis += '</div>';
+
+            return analysis;
+        }
+
+        /**
+         * Merender grafik Radar Chart.js di layar hasil.
+         */
+        function renderResultsChart() {
+            const ctx = document.getElementById('resultsChart');
+            if (chartInstance) {
+                chartInstance.destroy(); // Hapus instance sebelumnya
+            }
+
+            const data = {
+                labels: ['Emosional', 'Kognitif', 'Perilaku'],
+                datasets: [{
+                    label: 'Skor Aspek Kesetiaan (Max 100)',
+                    data: [
+                        aspectScores.Emosional,
+                        aspectScores.Kognitif,
+                        aspectScores.Perilaku
+                    ],
+                    backgroundColor: 'rgba(255, 105, 180, 0.4)', // Pink Transparan
+                    borderColor: '#FF69B4', // Hot Pink
+                    borderWidth: 2,
+                    pointBackgroundColor: '#FF69B4',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#FF69B4'
+                }]
+            };
+
+            const config = {
+                type: 'radar',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#FFC0CB' },
+                            grid: { color: '#FFC0CB' },
+                            pointLabels: { font: { size: 14, weight: 'bold' }, color: '#333' },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: { stepSize: 20, color: '#FF69B4', backdropColor: 'white' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Visualisasi Skor Aspek', font: { size: 16 } }
+                    }
+                }
+            };
+
+            chartInstance = new Chart(ctx, config);
+        }
+
+        /**
+         * Mengatur kembali tes ke layar awal.
+         */
+        function resetTest() {
+            userProfile = {};
+            rawScores = {};
+            aspectScores = { Emosional: 0, Kognitif: 0, Perilaku: 0 };
+            finalScore = 0;
+            
+            // Reset input form
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-gender').value = '';
+            document.getElementById('user-relationship').value = '';
+
+            // Hapus chart
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+
+            // Pindah ke layar awal
+            showScreen('home-screen');
+        }
+
+        /**
+         * Fungsi untuk mencetak hasil tes.
+         */
+        function printResults() {
+            window.print();
+        }
+
+        // --- INISIALISASI APLIKASI ---
+        window.onload = function() {
+            // Set event listeners
+            document.getElementById('start-input-btn').onclick = () => showScreen('input-screen');
+            document.getElementById('start-test-btn').onclick = startTest;
+            document.getElementById('finish-test-btn').onclick = calculateAndShowResults;
+            document.getElementById('reset-test-results-btn').onclick = resetTest;
+            document.getElementById('print-results-btn').onclick = printResults;
+            document.getElementById('close-about-modal').onclick = () => showAboutModal(false);
+
+            // Tampilkan layar awal saat pertama kali dimuat
+            showScreen('home-screen');
+        };
+    </script>
+</head>
+<body>
+
+<div class="app-container">
+    
+
+<div id="about-modal" class="modal fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-xl p-8 max-w-lg w-full shadow-2xl transform transition-all relative">
+            <button id="close-about-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">
+                &times;
+            </button>
+            <h2 class="text-3xl font-bold text-[#FF69B4] mb-4">Tentang Aplikasi & Pengembang</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                **Tes Kesetiaan Digital** ini dikembangkan sebagai alat bantu refleksi diri mengenai nilai-nilai komitmen dalam berbagai jenis hubungan.
+                Skor dan hasil yang ditampilkan bersifat indikatif dan tidak menggantikan penilaian profesional.
+            </p>
+            <div class="border-t pt-4">
+                <p class="font-bold text-lg text-gray-800">Dikembangkan oleh:</p>
+                <p class="text-xl font-extrabold text-[#FF69B4]">ALFIAN</p>
+                <p class="text-gray-500">Guru Bimbingan Konseling</p>
+                <p class="text-gray-500 text-sm mt-1">Kab. Manokwari - Provinsi Papua Barat</p>
+                <p class="text-xs text-gray-400 mt-3">Kode Aplikasi: <span class="font-mono">APP-DLD-2025-001</span></p>
+                <p class="text-xs text-gray-400">Tahun: 2025</p>
+            </div>
+        </div>
+    </div>
+
+    
+
+<div id="home-screen" class="main-content text-center flex flex-col items-center justify-center">
+        
+
+<svg class="w-24 h-24 text-[#FF69B4] mb-4 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <h1 class="text-5xl font-extrabold text-[#FF69B4] mb-4">
+            Tes Kesetiaan Digital
+        </h1>
+        <p class="text-gray-600 mb-8 max-w-md">
+            Ukur dan pahami tingkat komitmen serta integritas Anda dalam berbagai hubungan, mulai dari pasangan, teman, hingga lingkungan kerja.
+        </p>
+        <div class="flex space-x-4">
+            <button id="start-input-btn" class="btn-pink text-lg">
+                Mulai Tes
+            </button>
+            <button id="about-test-btn" class="btn-outline text-lg">
+                Tentang Tes
+            </button>
+        </div>
+        <p class="mt-8 text-sm text-gray-400">
+            Aplikasi ini dikembangkan oleh ALFIAN – Guru Bimbingan Konseling (Kab. Manokwari - Papua Barat).
+        </p>
+        <p class="mt-1 text-xs text-gray-400">
+            Kode: APP-DLD-2025-001 | Tahun: 2025
+        </p>
+    </div>
+
+    
+
+<div id="input-screen" class="main-content hidden">
+        <h2 class="text-4xl font-bold text-[#FF69B4] mb-6 border-b pb-2">Data Peserta Tes</h2>
+        <div class="space-y-6 max-w-md mx-auto">
+            <div>
+                <label for="user-name" class="block text-gray-700 font-semibold mb-2">Nama Anda</label>
+                <input type="text" id="user-name" class="input-style" placeholder="Masukkan Nama Anda" required>
+            </div>
+            <div>
+                <label for="user-gender" class="block text-gray-700 font-semibold mb-2">Jenis Kelamin (Opsional)</label>
+                <select id="user-gender" class="input-style">
+                    <option value="">Pilih</option>
+                    <option value="Pria">Pria</option>
+                    <option value="Wanita">Wanita</option>
+                    <option value="Lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div>
+                <label for="user-relationship" class="block text-gray-700 font-semibold mb-2">Hubungan yang Dinilai</label>
+                <input type="text" id="user-relationship" class="input-style" placeholder="Misal: Pasangan, Teman Dekat, Rekan Kerja" required>
+            </div>
+            
+            <p id="input-error-message" class="text-sm text-red-500 font-medium h-4"></p>
+
+            <div class="flex justify-between pt-4">
+                <button onclick="showScreen('home-screen')" class="btn-outline">
+                    &larr; Kembali
+                </button>
+                <button id="start-test-btn" class="btn-pink">
+                    Lanjut ke Pertanyaan &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+
+<div id="test-screen" class="main-content hidden">
+        <h2 class="text-4xl font-bold text-[#FF69B4] mb-6 text-center">Bagian Pertanyaan Tes</h2>
+        <p class="text-center text-gray-600 mb-6">Pilih skala (1-5) yang paling sesuai dengan diri Anda saat ini.</p>
+        
+        <div id="questions-container" class="space-y-4">
+            
+
+</div>
+        
+        <p id="test-error-message" class="text-center text-sm text-red-500 font-medium mt-4 h-4"></p>
+
+        <div class="mt-10 flex justify-center">
+            <button id="finish-test-btn" class="btn-pink text-xl px-8 py-3">
+                Selesaikan Tes & Lihat Hasil
+            </button>
+        </div>
+        
+        <div class="mt-4 flex justify-center text-sm text-gray-500">
+            <p>1 = Sangat Tidak Setuju, 5 = Sangat Setuju</p>
+        </div>
+    </div>
+
+    
+
+<div id="results-screen" class="main-content hidden">
+        <div class="print-hidden">
+            <h2 class="text-4xl font-bold text-[#FF69B4] mb-2 text-center">Hasil Tes Kesetiaan</h2>
+            <p class="text-center text-gray-600 mb-6">Laporan Komitmen untuk <span class="font-semibold text-gray-800" id="result-name"></span> dalam Hubungan <span class="font-semibold text-gray-800" id="result-relationship"></span></p>
+        </div>
+        
+        
+
+<div class="print-visible hidden">
+            <div class="flex items-center justify-center mb-4">
+                <svg class="w-16 h-16 text-[#FF69B4] mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                <h1 class="text-3xl font-bold text-[#FF69B4]">Laporan Resmi Tes Kesetiaan Digital</h1>
+            </div>
+            <p class="mb-1">Tanggal Tes: <span id="print-date"></span></p>
+            <p class="mb-1">Nama: <span id="print-name" class="font-bold"></span></p>
+            <p class="mb-4">Hubungan: <span id="print-relation"></span></p>
+            <p class="mb-1 text-sm text-gray-500">Pengembang: Alfian, Guru Bimbingan Konseling - Kab. Manokwari</p>
+            <p class="mb-4 text-xs text-gray-400">Kode Aplikasi: <span class="font-mono">APP-DLD-2025-001</span> | Tahun: 2025</p>
+        </div>
+
+        
+
+<div class="bg-pink-50 p-6 rounded-xl shadow-lg mb-6 text-center">
+            <p class="text-xl font-medium text-gray-600">Skor Kesetiaan Total Anda</p>
+            <p class="text-7xl font-extrabold text-[#FF69B4]" id="result-score"></p>
+            <p class="text-2xl font-extrabold mt-2" id="result-category"></p>
+        </div>
+        
+        
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+
+<div class="p-4 bg-white rounded-xl shadow-inner border border-pink-100">
+                <canvas id="resultsChart"></canvas>
+            </div>
+            
+            
+
+<div class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-[#FFC0CB]">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Interpretasi Hasil</h3>
+                <div id="result-analysis" class="text-gray-700 space-y-3">
+                    
+
+</div>
+            </div>
+        </div>
+
+        
+
+<div class="mt-10 flex flex-wrap justify-center gap-4 print-hidden">
+            <button id="print-results-btn" class="btn-outline flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m0 0h10m-4 0v-4m-3 4V9" />
+                </svg>
+                Cetak Hasil Tes
+            </button>
+            <button id="reset-test-results-btn" class="btn-pink flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.356-2a8.001 8.001 0 0014.174-2m0 0H15" />
+                </svg>
+                Reset Tes
+            </button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
