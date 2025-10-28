@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tes Kesetiaan Digital | Alfian, Guru Bimbingan Konseling - Manokwari</title>
+    <title>Tes Kesetiaan Digital | Wulan Permata Sari, Guru Bimbingan Konseling - Manokwari</title>
     
-
 <script src="https://cdn.tailwindcss.com"></script>
     
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <style>
         /* Mengatur tema warna pink/putih dan font lembut */
@@ -338,6 +336,69 @@
         }
 
         /**
+         * Menghasilkan rekomendasi tindak lanjut berdasarkan skor total dan aspek.
+         * @returns {string} Rekomendasi tindak lanjut dalam format HTML
+         */
+        function generateRecommendations() {
+            let advice = '<ul class="list-none p-0">';
+            const lowestAspect = Object.keys(aspectScores).reduce((a, b) => aspectScores[a] < aspectScores[b] ? a : b);
+            const lowestScore = aspectScores[lowestAspect];
+
+            if (finalScore >= 81) {
+                advice += `
+                    <li class="flex items-start mb-3"><span class="text-[#FF69B4] mr-3 font-bold text-2xl leading-none">💖</span>
+                        <p><strong>Pertahankan Konsistensi:</strong> Kesetiaan adalah marathon. Terus praktikkan nilai-nilai ini setiap hari, baik secara emosional, kognitif, maupun perilaku.</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-[#FF69B4] mr-3 font-bold text-2xl leading-none">✨</span>
+                        <p><strong>Jadilah Inspirasi:</strong> Gunakan integritas Anda untuk memberikan dampak positif pada lingkungan sekitar dan orang-orang yang Anda sayangi.</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-[#FF69B4] mr-3 font-bold text-2xl leading-none">📅</span>
+                        <p><strong>Cek Berkala:</strong> Ulangi tes ini secara berkala (misal 6 bulan sekali) untuk memastikan Anda tidak lengah dan tetap menguatkan komitmen diri.</p>
+                    </li>
+                `;
+            } else if (finalScore >= 61) {
+                advice += `
+                    <li class="flex items-start mb-3"><span class="text-yellow-600 mr-3 font-bold text-2xl leading-none">🛠️</span>
+                        <p><strong>Fokus pada Aspek Terlemah:</strong> Aspek **${lowestAspect}** (${lowestScore}/100) memerlukan perhatian lebih. Coba identifikasi tindakan spesifik untuk memperkuatnya (misal: lebih sering komunikasi jujur jika Kognitif lemah).</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-yellow-600 mr-3 font-bold text-2xl leading-none">🎯</span>
+                        <p><strong>Set Goals Komitmen:</strong> Tetapkan tujuan kecil yang dapat diukur untuk menunjukkan kesetiaan dalam tindakan nyata (Aspek Perilaku) dalam minggu ini.</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-yellow-600 mr-3 font-bold text-2xl leading-none">👂</span>
+                        <p><strong>Tingkatkan Empati:</strong> Latih diri untuk selalu melihat dari sudut pandang orang yang Anda sayangi sebelum membuat keputusan penting.</p>
+                    </li>
+                `;
+            } else if (finalScore >= 41) {
+                advice += `
+                    <li class="flex items-start mb-3"><span class="text-orange-600 mr-3 font-bold text-2xl leading-none">❓</span>
+                        <p><strong>Refleksi Mendalam:</strong> Tanyakan pada diri Anda: Apa yang menghalangi saya untuk sepenuhnya setia? Apakah ini masalah rasa takut, godaan, atau kurangnya kepuasan?</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-orange-600 mr-3 font-bold text-2xl leading-none">🤝</span>
+                        <p><strong>Minta Bantuan Profesional:</strong> Pertimbangkan untuk mencari mentor, konselor, atau guru BK (Bimbingan Konseling) untuk membahas hasil tes ini dan merencanakan perbaikan diri secara terstruktur.</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-orange-600 mr-3 font-bold text-2xl leading-none">🛑</span>
+                        <p><strong>Perkuat Batasan Diri:</strong> Batasi interaksi (terutama di media sosial/daring) yang dapat memicu pikiran atau tindakan tidak setia. Prioritaskan batasan yang jelas.</p>
+                    </li>
+                `;
+            } else {
+                 advice += `
+                    <li class="flex items-start mb-3"><span class="text-red-600 mr-3 font-bold text-2xl leading-none">🚨</span>
+                        <p><strong>Evaluasi Ulang Komitmen:</strong> Ini adalah sinyal kuat untuk menghentikan sejenak dan mengevaluasi kembali semua komitmen yang ada. Apakah Anda benar-benar mampu dan bersedia menjalaninya?</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-red-600 mr-3 font-bold text-2xl leading-none">🔍</span>
+                        <p><strong>Identifikasi Akar Masalah:</strong> Jangan hanya fokus pada gejala, cari akar masalah ketidaksetiaan (misal: trauma masa lalu, rasa rendah diri, atau ekspektasi yang tidak realistis).</p>
+                    </li>
+                    <li class="flex items-start mb-3"><span class="text-red-600 mr-3 font-bold text-2xl leading-none">🔄</span>
+                        <p><strong>Lakukan Perubahan Radikal:</strong> Karena skor sangat rendah, tindakan perbaikan harus segera dan radikal. Cari dukungan profesional segera untuk membantu memulihkan integritas diri.</p>
+                    </li>
+                `;
+            }
+
+            advice += '</ul>';
+            return advice;
+        }
+
+        /**
          * Menghitung dan menampilkan hasil tes.
          */
         function calculateAndShowResults() {
@@ -377,6 +438,7 @@
             // 5. Tentukan Kategori dan Analisis
             const resultCategory = determineCategory(finalScore);
             const descriptiveAnalysis = generateAnalysis(aspects);
+            const recommendations = generateRecommendations();
 
             // 6. Tampilkan hasil di layar
             document.getElementById('result-name').textContent = userProfile.name;
@@ -385,6 +447,7 @@
             document.getElementById('result-category').textContent = resultCategory.label;
             document.getElementById('result-category').className = `text-4xl font-extrabold mb-4 ${resultCategory.class}`;
             document.getElementById('result-analysis').innerHTML = descriptiveAnalysis;
+            document.getElementById('result-recommendations').innerHTML = recommendations; // MEMPERBARUI: Memasukkan rekomendasi
 
             // Update print section
             document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID');
@@ -559,7 +622,6 @@
 
 <div class="app-container">
     
-
 <div id="about-modal" class="modal fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-xl p-8 max-w-lg w-full shadow-2xl transform transition-all relative">
             <button id="close-about-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">
@@ -572,9 +634,9 @@
             </p>
             <div class="border-t pt-4">
                 <p class="font-bold text-lg text-gray-800">Dikembangkan oleh:</p>
-                <p class="text-xl font-extrabold text-[#FF69B4]">ALFIAN</p>
+                <p class="text-xl font-extrabold text-[#FF69B4]">WULAN PERMATA SARI</p>
                 <p class="text-gray-500">Guru Bimbingan Konseling</p>
-                <p class="text-gray-500 text-sm mt-1">Kab. Manokwari - Provinsi Papua Barat</p>
+                <p class="text-gray-500 text-sm mt-1">Kota Sorong</p><!-- PERUBAHAN LOKASI 1 -->
                 <p class="text-xs text-gray-400 mt-3">Kode Aplikasi: <span class="font-mono">APP-DLD-2025-001</span></p>
                 <p class="text-xs text-gray-400">Tahun: 2025</p>
             </div>
@@ -582,10 +644,8 @@
     </div>
 
     
-
 <div id="home-screen" class="main-content text-center flex flex-col items-center justify-center">
         
-
 <svg class="w-24 h-24 text-[#FF69B4] mb-4 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
         </svg>
@@ -604,15 +664,14 @@
             </button>
         </div>
         <p class="mt-8 text-sm text-gray-400">
-            Aplikasi ini dikembangkan oleh ALFIAN – Guru Bimbingan Konseling (Kab. Manokwari - Papua Barat).
-        </p>
+            Aplikasi ini dikembangkan oleh WULAN PERMATA SARI – Guru Bimbingan Konseling (Kota Sorong).
+        </p><!-- PERUBAHAN LOKASI 2 -->
         <p class="mt-1 text-xs text-gray-400">
             Kode: APP-DLD-2025-001 | Tahun: 2025
         </p>
     </div>
 
     
-
 <div id="input-screen" class="main-content hidden">
         <h2 class="text-4xl font-bold text-[#FF69B4] mb-6 border-b pb-2">Data Peserta Tes</h2>
         <div class="space-y-6 max-w-md mx-auto">
@@ -648,14 +707,12 @@
     </div>
 
     
-
 <div id="test-screen" class="main-content hidden">
         <h2 class="text-4xl font-bold text-[#FF69B4] mb-6 text-center">Bagian Pertanyaan Tes</h2>
         <p class="text-center text-gray-600 mb-6">Pilih skala (1-5) yang paling sesuai dengan diri Anda saat ini.</p>
         
         <div id="questions-container" class="space-y-4">
             
-
 </div>
         
         <p id="test-error-message" class="text-center text-sm text-red-500 font-medium mt-4 h-4"></p>
@@ -672,7 +729,6 @@
     </div>
 
     
-
 <div id="results-screen" class="main-content hidden">
         <div class="print-hidden">
             <h2 class="text-4xl font-bold text-[#FF69B4] mb-2 text-center">Hasil Tes Kesetiaan</h2>
@@ -680,7 +736,6 @@
         </div>
         
         
-
 <div class="print-visible hidden">
             <div class="flex items-center justify-center mb-4">
                 <svg class="w-16 h-16 text-[#FF69B4] mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -691,12 +746,11 @@
             <p class="mb-1">Tanggal Tes: <span id="print-date"></span></p>
             <p class="mb-1">Nama: <span id="print-name" class="font-bold"></span></p>
             <p class="mb-4">Hubungan: <span id="print-relation"></span></p>
-            <p class="mb-1 text-sm text-gray-500">Pengembang: Alfian, Guru Bimbingan Konseling - Kab. Manokwari</p>
+            <p class="mb-1 text-sm text-gray-500">Pengembang: Wulan Permata Sari, Guru Bimbingan Konseling - Kota Sorong</p><!-- PERUBAHAN LOKASI PRINT -->
             <p class="mb-4 text-xs text-gray-400">Kode Aplikasi: <span class="font-mono">APP-DLD-2025-001</span> | Tahun: 2025</p>
         </div>
 
         
-
 <div class="bg-pink-50 p-6 rounded-xl shadow-lg mb-6 text-center">
             <p class="text-xl font-medium text-gray-600">Skor Kesetiaan Total Anda</p>
             <p class="text-7xl font-extrabold text-[#FF69B4]" id="result-score"></p>
@@ -704,27 +758,31 @@
         </div>
         
         
-
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-
 <div class="p-4 bg-white rounded-xl shadow-inner border border-pink-100">
                 <canvas id="resultsChart"></canvas>
             </div>
             
             
-
 <div class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-[#FFC0CB]">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Interpretasi Hasil</h3>
                 <div id="result-analysis" class="text-gray-700 space-y-3">
                     
-
 </div>
             </div>
         </div>
 
-        
+        <!-- NEW SECTION: Tindak Lanjut & Rekomendasi -->
+        <div class="mt-8 p-6 bg-white rounded-xl shadow-lg border-t-4 border-[#FF69B4]">
+            <h3 class="text-2xl font-bold text-[#FF69B4] mb-4 border-b pb-2">Tindak Lanjut & Rekomendasi</h3>
+            <div id="result-recommendations" class="text-gray-700 space-y-3">
+                <!-- Recommendations will be injected here by JS -->
+            </div>
+        </div>
+        <!-- END NEW SECTION -->
 
+        
 <div class="mt-10 flex flex-wrap justify-center gap-4 print-hidden">
             <button id="print-results-btn" class="btn-outline flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
